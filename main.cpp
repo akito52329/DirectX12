@@ -52,7 +52,7 @@ int WINAPI WinMain(HINSTANCE, HINSSTANCE, LPSTR, int)
 	w.cbSize = sizeof(WNDCLASSEX);
 	w.lpfnWndProc = (WNDPROC)WindowProcedure; //コールバック関数の指定
 	w.lpszClassName = _T("DX12Sample");//アプリケーションクラス名（適当でよい）
-	w.hInstance = GetModuleHandle(nullptr); //
+	w.hInstance = GetModuleHandle(nullptr); //ハンドルの取得
 
 	RegisterClassEx(&w);//アプリケーションクラス（ウィンドウクラスの指定をOSに伝える）
 
