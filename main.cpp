@@ -244,11 +244,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	ShowWindow(hwnd, SW_SHOW);
 
 	MSG	msg = {};
-	float clearColor[2][4] = { {1.0f, 1.0f, 0.0f, 1.0f}, { 0.0f, 1.0f, 1.0f, 1.0f }}; //色
-	int num = 0;
+	int g = 0;
+	float clearColor[] = { 1.0f, 1.0f, 0.0f, 1.0f }; //色
+	
 
 	while (true)
 	{
+		//clearColor = new float[]{1.0f, 1.0f, num, 1.0f};
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 		{
 			TranslateMessage(&msg);
@@ -261,12 +263,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			break;
 		}
 
+		g++;
+		clearColor[0] = sin((g % 60) / 60);
+		//clearColor[1] = 1 - sin((g % 60) / 60);
+
 		// スワップチェーンを動作
 		auto bbIdx = _swapchain->GetCurrentBackBufferIndex();
 		auto rtvH = rtvHeaps->GetCPUDescriptorHandleForHeapStart();
 		rtvH.ptr += bbIdx * _dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 		_cmdList->OMSetRenderTargets(1, &rtvH, true, nullptr);
-		_cmdList->ClearRenderTargetView(rtvH, clearColor[num], 0, nullptr);
+		_cmdList->ClearRenderTargetView(rtvH, clearColor, 0, nullptr);
+
 		// 命令のクローズ
 		_cmdList->Close();
 		//コマンドリストの実行
@@ -286,7 +293,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		_cmdList->Reset(_cmdAllocator, nullptr);//再びコマンドリストをためる準備
 		//フリップ
 		_swapchain->Present(1, 0);
-		num = 1 - num;
+
 	}
 
 	//もうクラスは使わないので登録解除する
