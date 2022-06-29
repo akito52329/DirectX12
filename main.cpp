@@ -3,7 +3,10 @@
 #include<tchar.h>
 #include<d3d12.h> 
 #include<dxgi1_6.h>
+#include <numbers>
 #include<vector>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 #ifdef _DEBUG
 #include <iostream>
@@ -182,7 +185,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// キュー生成
 	result = _dev->CreateCommandQueue(&cmdQueueDesc, IID_PPV_ARGS(&_cmdQueue));
 
-	//Chapter3_3_3 P79  
 	//スワップチェーン
 	DXGI_SWAP_CHAIN_DESC1 swapchainDesc = {};
 	swapchainDesc.Width = window_width;
@@ -245,12 +247,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	MSG	msg = {};
 	int g = 0;
-	float clearColor[] = { 1.0f, 1.0f, 0.0f, 1.0f }; //色
+	float clearColor[] = { 1.0f, 0.0f, 1.0f, 1.0f }; //色
 	
 
 	while (true)
 	{
-		//clearColor = new float[]{1.0f, 1.0f, num, 1.0f};
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 		{
 			TranslateMessage(&msg);
@@ -264,8 +265,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 
 		g++;
-		clearColor[0] = sin((g % 60) / 60);
-		//clearColor[1] = 1 - sin((g % 60) / 60);
+		clearColor[0] = sinf((g %  30) / 90  * M_PI);
+		//clearColor[1] = 1 - sin((g % 12) * M_PI);
 
 		// スワップチェーンを動作
 		auto bbIdx = _swapchain->GetCurrentBackBufferIndex();
