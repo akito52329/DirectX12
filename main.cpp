@@ -41,8 +41,8 @@ LRESULT WindowProcedure(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
-const unsigned int window_width = 1920;
-const unsigned int window_height = 1080;
+const unsigned int window_width = 1080;
+const unsigned int window_height = 600;
 
 ID3D12Device* _dev = nullptr;
 IDXGIFactory6* _dxgiFactory = nullptr;
@@ -247,7 +247,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	MSG	msg = {};
 	int g = 0;
-	float clearColor[] = { 1.0f, 0.0f, 1.0f, 1.0f }; //色
+	float clearColor[] = { 1.0f, 1.0f, 0.0f, 1.0f }; //色
 	
 
 	while (true)
@@ -265,8 +265,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 
 		g++;
-		clearColor[0] = sinf((g %  30) / 90  * M_PI);
-		//clearColor[1] = 1 - sin((g % 12) * M_PI);
+		clearColor[0] = sin(g % 15);
 
 		// スワップチェーンを動作
 		auto bbIdx = _swapchain->GetCurrentBackBufferIndex();
