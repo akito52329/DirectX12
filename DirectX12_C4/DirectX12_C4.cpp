@@ -4,8 +4,12 @@
 #include<dxgi1_6.h>
 #include <numbers>
 #include<vector>
-#define _USE_MATH_DEFINES
-#include <math.h>
+#include <DirectXMath.h>
+using namespace DirectX;
+
+/*#define _USE_MATH_DEFINES
+#include <math.h>*/
+
 
 #ifdef _DEBUG
 #include <iostream>
@@ -244,6 +248,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	ShowWindow(hwnd, SW_SHOW);
 
+	XMFLOAT3 vertices[] =
+	{
+		{-1.0f, -1.0f, 0.0f},//左下
+		{-1.0f, 1.0f, 0.0f},//左上
+		{1.0f, -1.0f, 0.0f},//右上
+	};
+
+	/*HRESULT CreateCommittedResource(
+		const D3D12_HEAP_PROPERTIES* pHeapProperties,
+		D3D12_HEAP_FLAGS            HeapFlags,
+		const D3D12_RESOURCE_DESC* pDesc,
+		D3D12_RESOURCE_STATES       InitialResourceState,
+		const D3D12_CLEAR_VALUE* pOptimizedClearValue,
+		REFIID                      riidResource,
+		void** ppvResource
+	);*/
+
 	MSG	msg = {};
 	int g = 0;
 	float clearColor[] = { 1.0f, 1.0f, 0.0f, 1.0f }; //色
@@ -263,10 +284,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			break;
 		}
 
-		g++;
+		/*g++;
 		clearColor[0] = abs(sin((g % 300) / 300.0f * M_PI));
 		clearColor[1] = abs(sin((g % 200) / 200.0f * M_PI));
-		clearColor[2] = abs(sin((g % 100) / 100.0f * M_PI));
+		clearColor[2] = abs(sin((g % 100) / 100.0f * M_PI));*/
 
 
 		// スワップチェーンを動作
