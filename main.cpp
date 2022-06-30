@@ -266,8 +266,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		g++;
 		clearColor[0] = abs(sin((g % 300) / 300.0f * M_PI));
-		clearColor[1] = 1 - clearColor[0];
-		//clearColor[2] = 1 - clearColor[0] / clearColor[1];
+        clearColor[1] = abs(sin((g % 200) / 200.0f * M_PI));
+		clearColor[2] = abs(sin((g % 100) / 100.0f * M_PI));
+		
 
 		// スワップチェーンを動作
 		auto bbIdx = _swapchain->GetCurrentBackBufferIndex();
