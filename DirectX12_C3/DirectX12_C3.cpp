@@ -1,5 +1,4 @@
-﻿
-#include <Windows.h>
+﻿#include <Windows.h>
 #include<tchar.h>
 #include<d3d12.h> 
 #include<dxgi1_6.h>
@@ -46,16 +45,16 @@ const unsigned int window_height = 600;
 
 ID3D12Device* _dev = nullptr;
 IDXGIFactory6* _dxgiFactory = nullptr;
-ID3D12CommandAllocator* _cmdAllocator = nullptr;	
-ID3D12GraphicsCommandList* _cmdList = nullptr;		
+ID3D12CommandAllocator* _cmdAllocator = nullptr;
+ID3D12GraphicsCommandList* _cmdList = nullptr;
 ID3D12CommandQueue* _cmdQueue = nullptr;
-IDXGISwapChain4* _swapchain = nullptr;	
+IDXGISwapChain4* _swapchain = nullptr;
 
 
 void EnableDebugLayer()
 {
 	ID3D12Debug* debugLayer = nullptr;
-	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugLayer)))) 
+	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugLayer))))
 	{
 		debugLayer->EnableDebugLayer();
 		debugLayer->Release();
@@ -105,8 +104,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	EnableDebugLayer();
 #endif
 
-// DirectX12の導入
-//  1.IDXGIFactory6を生成
+	// DirectX12の導入
+	//  1.IDXGIFactory6を生成
 	HRESULT result = S_OK;
 	if (FAILED(CreateDXGIFactory2(DXGI_CREATE_FACTORY_DEBUG, IID_PPV_ARGS(&_dxgiFactory))))
 	{
@@ -120,7 +119,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//  2.VGAアダプタIDXGIAdapterの配列をIDXGIFactory6から取り出す
 	std::vector <IDXGIAdapter*> adapters;
 	IDXGIAdapter* tmpAdapter = nullptr;
-	for (int i = 0; _dxgiFactory->EnumAdapters(i, &tmpAdapter) != DXGI_ERROR_NOT_FOUND; ++i) 
+	for (int i = 0; _dxgiFactory->EnumAdapters(i, &tmpAdapter) != DXGI_ERROR_NOT_FOUND; ++i)
 	{
 		adapters.push_back(tmpAdapter);
 	}
@@ -131,7 +130,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		DXGI_ADAPTER_DESC adesc = {};
 		adpt->GetDesc(&adesc); // アダプターの説明オブジェクト取得
 		std::wstring strDesc = adesc.Description;    // 探したいアダプターの名前を確認
-		if (strDesc.find(L"NVIDIA") != std::string::npos) 
+		if (strDesc.find(L"NVIDIA") != std::string::npos)
 		{
 			tmpAdapter = adpt;
 			break;
@@ -169,7 +168,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	// コマンドリストID3D12GraphicsCommandListを生成
 	result = _dev->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, _cmdAllocator, nullptr, IID_PPV_ARGS(&_cmdList));
-	if (result != S_OK) 
+	if (result != S_OK)
 	{
 		DebugOutputFormatString("FAILED CreateCommandList");
 		return -1;
@@ -248,7 +247,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	MSG	msg = {};
 	int g = 0;
 	float clearColor[] = { 1.0f, 1.0f, 0.0f, 1.0f }; //色
-	
+
 
 	while (true)
 	{
@@ -259,16 +258,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 
 		//アプリケーションが終わるときにmessageがWM_QUITになる    
-		if (msg.message == WM_QUIT) 
+		if (msg.message == WM_QUIT)
 		{
 			break;
 		}
 
 		g++;
 		clearColor[0] = abs(sin((g % 300) / 300.0f * M_PI));
-        clearColor[1] = abs(sin((g % 200) / 200.0f * M_PI));
+		clearColor[1] = abs(sin((g % 200) / 200.0f * M_PI));
 		clearColor[2] = abs(sin((g % 100) / 100.0f * M_PI));
-		
+
 
 		// スワップチェーンを動作
 		auto bbIdx = _swapchain->GetCurrentBackBufferIndex();
@@ -284,7 +283,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		_cmdQueue->ExecuteCommandLists(1, cmdlists);
 
 		_cmdQueue->Signal(_fence, ++_fenceVal);
-		if (_fence->GetCompletedValue() != _fenceVal) 
+		if (_fence->GetCompletedValue() != _fenceVal)
 		{
 			auto event = CreateEvent(nullptr, false, false, nullptr);
 			_fence->SetEventOnCompletion(_fenceVal, event);
