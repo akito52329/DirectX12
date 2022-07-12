@@ -5,6 +5,8 @@
 #include <numbers>
 #include<vector>
 #include <DirectXMath.h>
+#include <d3dcompiler.h>
+#pragma comment(lib, "d3dcompiler.lib")
 using namespace DirectX;
 
 /*#define _USE_MATH_DEFINES
@@ -292,6 +294,107 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	vbView.BufferLocation = vertBuff->GetGPUVirtualAddress();
 	vbView.SizeInBytes = sizeof(vertices);
 	vbView.StrideInBytes = sizeof(vertices[0]);
+
+	ID3D10Blob* _vsBlob = nullptr;
+	ID3D10Blob* _psBlob = nullptr;
+	ID3DBlob* errorBlob = nullptr;	//　エラー格納用
+
+	//　頂点シェーダーをコンパイルする
+	result = D3DCompileFromFile(
+		L"BasicVertexShader.hlsl",
+		nullptr,
+		D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		"BasicVS",
+		"vs_5_0",
+		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
+		0, 
+		&_vsBlob, &errorBlob);
+
+	if (SUCCEEDED(result))
+	{	//　頂点シェーダーのコンパイル成功、ピクセルシェーダーのコンパイル
+		result = D3DCompileFromFile(
+			L"BasicPixelShader.hlsl",
+			nullptr,
+			D3D_COMPILE_STANDARD_FILE_INCLUDE,
+			"BasicPS",
+			"ps_5_0",
+			D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
+			0, &_psBlob, &errorBlob
+		);
+
+		if (FAILED(result)) 
+		{// コンパイルエラーの場合
+			if (result == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND)) 
+			{
+				::OutputDebugStringA("シェーダーファイルが見当たりません");
+			}
+			else
+			{
+				std::string errstr;
+				errstr.resize(errorBlob->GetBufferSize());
+				std::copy_n((char*)errorBlob->GetBufferPointer(), errorBlob->GetBufferSize(), errstr.begin());
+				errstr += "\n";
+				OutputDebugStringA(errstr.c_str());
+			}
+			exit(1);
+		}
+	}
+	else 
+	{
+		if (result == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND))
+		{
+			::OutputDebugStringA("シェーダーファイルが見当たりません");
+		}
+		else
+		{
+			std::string errstr;
+			errstr.resize(errorBlob->GetBufferSize());
+			std::copy_n((char*)errorBlob->GetBufferPointer(), errorBlob->GetBufferSize(), errstr.begin());
+			errstr += "\n";
+			OutputDebugStringA(errstr.c_str());
+		}
+	}
+
+	D3D12_INPUT_ELEMENT_DESC inputLayout[] =
+	{
+		"POSITION",
+		0,
+		DXGI_FORMAT_R32G32B32_FLOAT,
+		0,
+		D3D12_APPEND_ALIGNED_ELEMENT,
+		D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,
+		0
+	};
+
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC gpipeline = {};
+
+	gpipeline.pRootSignature = nullptr;
+	gpipeline.VS.pShaderBytecode = _vsBlob->GetBufferPointer();
+	gpipeline.VS.BytecodeLength = _vsBlob->GetBufferSize();
+	gpipeline.PS.pShaderBytecode = _vsBlob->GetBufferPointer();
+	gpipeline.PS.BytecodeLength = _vsBlob->GetBufferSize();
+
+	gpipeline.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
+	gpipeline.RasterizerState.MultisampleEnable = false;
+
+	gpipeline.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+	gpipeline.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
+	gpipeline.RasterizerState.DepthClipEnable = true;
+
+	gpipeline.BlendState.AlphaToCoverageEnable = false;
+	gpipeline.BlendState.IndependentBlendEnable = false;
+
+	D3D12_RENDER_TARGET_BLEND_DESC renderTargentBlendDesc = {};
+	renderTargentBlendDesc.BlendEnable = false;
+	renderTargentBlendDesc.LogicOpEnable = false;
+	renderTargentBlendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+	gpipeline.BlendState.RenderTarget[0] = renderTargentBlendDesc;
+
+
+
+
+
 
 	MSG	msg = {};
 	int g = 0;
