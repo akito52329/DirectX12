@@ -369,6 +369,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC gpipeline = {};
 
 	gpipeline.pRootSignature = nullptr;
+
+
 	gpipeline.VS.pShaderBytecode = _vsBlob->GetBufferPointer();
 	gpipeline.VS.BytecodeLength = _vsBlob->GetBufferSize();
 	gpipeline.PS.pShaderBytecode = _vsBlob->GetBufferPointer();
@@ -391,9 +393,72 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	gpipeline.BlendState.RenderTarget[0] = renderTargentBlendDesc;
 
+	gpipeline.RasterizerState.FrontCounterClockwise = false;
+	gpipeline.RasterizerState.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
+	gpipeline.RasterizerState.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
+	gpipeline.RasterizerState.SlopeScaledDepthBias = D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
+	gpipeline.RasterizerState.AntialiasedLineEnable = false;
+	gpipeline.RasterizerState.ForcedSampleCount = 0;
+	gpipeline.RasterizerState.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
 
 
+	gpipeline.DepthStencilState.DepthEnable = false;
+	gpipeline.DepthStencilState.StencilEnable = false;
 
+	gpipeline.InputLayout.pInputElementDescs = inputLayout;
+	gpipeline.InputLayout.NumElements = _countof(inputLayout);
+
+	gpipeline.IBStripCutValue = D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED;
+
+	//三角形構成
+	gpipeline.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+
+	gpipeline.NumRenderTargets = 1;
+	gpipeline.RTVFormats[0] = DXGI_FORMAT_B8G8R8A8_UNORM;
+
+	gpipeline.SampleDesc.Count = 1;
+	gpipeline.SampleDesc.Quality = 0;
+
+	ID3D12RootSignature* rootsignature = nullptr;
+	D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc = {};
+	rootSignatureDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+	ID3DBlob* rootSigBlob = nullptr;
+
+	result = D3D12SerializeRootSignature(
+		&rootSignatureDesc,
+		D3D_ROOT_SIGNATURE_VERSION_1_0,
+		&rootSigBlob,
+		&errorBlob
+	);
+
+	result = _dev->CreateRootSignature(
+		0, // nodemask。0でよい
+		rootSigBlob->GetBufferPointer(),
+		rootSigBlob->GetBufferSize(),
+		IID_PPV_ARGS(&rootsignature)
+	);
+
+	rootSigBlob->Release();
+    gpipeline.pRootSignature = rootsignature;
+
+	ID3D12PipelineState* _pipelinestate = nullptr;
+
+	result = _dev->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&_pipelinestate));
+
+	D3D12_VIEWPORT viewport = {};
+	viewport.Width = window_width;
+	viewport.Height = window_height;
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.MaxDepth = 1.0f;
+	viewport.MinDepth = 0.0f;
+
+	D3D12_RECT scissorrect = {};
+	scissorrect.top = 0;
+	scissorrect.left = 0;
+	scissorrect.right = scissorrect.left + window_width;
+	scissorrect.bottom = scissorrect.top + window_height;
 
 
 	MSG	msg = {};
@@ -423,10 +488,39 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		// スワップチェーンを動作
 		auto bbIdx = _swapchain->GetCurrentBackBufferIndex();
+
+		D3D12_RESOURCE_BARRIER BarrierDesc = {};
+		BarrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		BarrierDesc.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		BarrierDesc.Transition.pResource = _backBuffers[bbIdx];
+		BarrierDesc.Transition.Subresource = 0;
+
+		BarrierDesc.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+		BarrierDesc.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+
+		_cmdList->ResourceBarrier(1, &BarrierDesc);
+		//_cmdList->SetPipelineState(_pipelinestate);
+
 		auto rtvH = rtvHeaps->GetCPUDescriptorHandleForHeapStart();
 		rtvH.ptr += bbIdx * _dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 		_cmdList->OMSetRenderTargets(1, &rtvH, true, nullptr);
+
+
+		float clearColor[] = { 1.0f,1.0f,0.0f,1.0f };//黄色
 		_cmdList->ClearRenderTargetView(rtvH, clearColor, 0, nullptr);
+
+
+		_cmdList->RSSetViewports(1, &viewport);
+		_cmdList->RSSetScissorRects(1, &scissorrect);
+		_cmdList->SetGraphicsRootSignature(rootsignature);
+		// トポロジ
+		_cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		// 頂点
+		_cmdList->IASetVertexBuffers(0, 1, &vbView);
+		//　頂点を描画
+		_cmdList->DrawInstanced(3, 1, 0, 0);
+
+
 
 		// 命令のクローズ
 		_cmdList->Close();
