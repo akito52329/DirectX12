@@ -6,6 +6,8 @@
 #include <DirectXMath.h>//Chapter4_2_1 P103
 #include<d3dcompiler.h>							//Chapter4_6_2 P118
 #pragma comment(lib, "d3dcompiler.lib")		//Chapter4_6_2 P118
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 using namespace DirectX;//Chapter4_2_1 P104
 
@@ -44,8 +46,8 @@ LRESULT WindowProcedure(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
-const unsigned int window_width = 1920;
-const unsigned int window_height = 1080;
+const unsigned int window_width = 1080;
+const unsigned int window_height = 600;
 
 //Chapter3_2_2 P66
 ID3D12Device* _dev = nullptr;
@@ -246,13 +248,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	ShowWindow(hwnd, SW_SHOW);
 
-
+//	float r = hwnd.Width / swapchainDesc.Height;
+	float r = 1.8f;
 	XMFLOAT3 vertices[] = 
 	{
-		{-0.4f, -0.7f, 0.0f} , // 左下
-		{-0.4f, 0.7f, 0.0f} , // 左上
-		{ 0.4f, -0.7f, 0.0f} , // 右下
-		{ 0.4f, 0.7f, 0.0f} , // 右下
+			{0.0f, 0.5f ,0.0f} ,//0
+			{0.5f / r, 0.25f,0.0f} ,//1
+			{0.5f / r, -0.25f,0.0f} ,//2
+			{0.0f , -0.5f,0.0f} ,//3
+			{-0.5f / r, -0.25f,0.0f} ,	//4
+			{-0.5f / r, 0.25f,0.0f},//5
+			{0.7f, 0.0f,0.0f},//6
+			{0.7f, -0.7f,0.0f},//7
+			{1.0f , -0.7f,0.0f},//8
 	};
 
 
@@ -297,7 +305,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	vbView.StrideInBytes = sizeof(vertices[0]); // 1頂点あたりのバイト数
 
 
-	unsigned short indices[] = { 0,1,2, 2,1,3 };
+	unsigned short indices[] = { 0,1,2, 0,2,3, 0,3,4, 0,4,5, 6,7,8};
 
 	ID3D12Resource* idxBuff = nullptr;
 	//設定は、バッファのサイズ以外頂点バッファの設定を使いまわして
@@ -476,6 +484,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	scissorrect.bottom = scissorrect.top + window_height; // 切り抜き下座標
 
 	MSG	msg = {};
+	int g = 0;
 	float clearColor[] = { 1.0f, 1.0f, 0.0f, 1.0f }; //黄色
 
 	while (true) {
@@ -489,6 +498,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		{
 			break;
 		}
+
+		RECT rx;
+		GetWindowRect(hwnd, &rx);
+		
+		r = (rx.right - rx.left) / (rx.bottom - rx.top);
+		vertices[2].x = 0.5f / r;
+		vertices[3].x =  0.5f / r;
+		vertices[4].x =  -0.5f / r;
+		vertices[5].x =  -0.5f / r;
+
+
+		g++;
+		clearColor[0] = sin((g % 300) / 300.0f * M_PI);
+		clearColor[1] = sin((g % 200) / 200.0f * M_PI);
+		clearColor[2] = sin((g % 100) / 100.0f * M_PI);
 
 
 		// スワップチェーンを動作
@@ -518,7 +542,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		_cmdList->IASetVertexBuffers(0, 1, &vbView);
 		_cmdList->IASetIndexBuffer(&ibView);
 		//_cmdList->DrawInstanced(4, 1, 0, 0);
-		_cmdList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+		_cmdList->DrawIndexedInstanced(15, 1, 0, 0, 0);
 
 		BarrierDesc.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 		BarrierDesc.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
