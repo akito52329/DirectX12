@@ -248,14 +248,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	ShowWindow(hwnd, SW_SHOW);
 
-//	float r = hwnd.Width / swapchainDesc.Height;
-	float r = 1.8f;
+	float r = (float)window_width / window_height;
 	XMFLOAT3 vertices[] = 
 	{
 			{0.0f, 0.5f ,0.0f} ,//0
 			{0.5f / r, 0.25f,0.0f} ,//1
 			{0.5f / r, -0.25f,0.0f} ,//2
-			{0.0f , -0.5f,0.0f} ,//3
+			{0.0f, -0.5f,0.0f} ,//3
 			{-0.5f / r, -0.25f,0.0f} ,	//4
 			{-0.5f / r, 0.25f,0.0f},//5
 			{0.7f, 0.0f,0.0f},//6
@@ -502,13 +501,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		RECT rx;
 		GetWindowRect(hwnd, &rx);
 		
-		r = (rx.right - rx.left) / (rx.bottom - rx.top);
-		vertices[2].x = 0.5f / r;
-		vertices[3].x =  0.5f / r;
-		vertices[4].x =  -0.5f / r;
-		vertices[5].x =  -0.5f / r;
-
-
 		g++;
 		clearColor[0] = sin((g % 300) / 300.0f * M_PI);
 		clearColor[1] = sin((g % 200) / 200.0f * M_PI);
