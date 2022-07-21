@@ -497,9 +497,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		{
 			break;
 		}
-
-		RECT rx;
-		GetWindowRect(hwnd, &rx);
 		
 		g++;
 		clearColor[0] = sin((g % 300) / 300.0f * M_PI);
