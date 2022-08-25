@@ -28,8 +28,6 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="BasicShaderHeader.hlsli">
-      <Filter>ヘッダー ファイル</Filter>
-    </None>
+    <None Include="BasicShaderHeader.hlsli" />
   </ItemGroup>
 </Project>
