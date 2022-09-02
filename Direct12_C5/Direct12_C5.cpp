@@ -6,6 +6,8 @@
 #include <DirectXMath.h>//Chapter4_2_1 P103
 #include<d3dcompiler.h>							//Chapter4_6_2 P118
 #pragma comment(lib, "d3dcompiler.lib")		//Chapter4_6_2 P118
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 using namespace DirectX;//Chapter4_2_1 P104
 
@@ -42,8 +44,8 @@ LRESULT WindowProcedure(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
-const unsigned int window_width = 1920;
-const unsigned int window_height = 1080;
+const unsigned int window_width = 1080;
+const unsigned int window_height = 600;
 
 //Chapter3_2_2 P66
 ID3D12Device* _dev = nullptr;
@@ -245,12 +247,53 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		XMFLOAT2 uv;  // uv座標
 	};
 
-	Vertex  vertices[] = {
+	float r = (float)window_width / window_height;
+
+
+	/*Vertex  vertices[] = {
 		{{-0.4f, -0.7f, 0.0f},	{0.0f, 1.0f}}, // 左下
-		{{-0.4f,  0.7f, 0.0f},	{0.0f, 0.0f}}, // 左上 
+		{{-0.4f,  0.7f, 0.0f},	{0.0f, 0.0f}}, // 左上
 		{{ 0.4f, -0.7f, 0.0f},	{1.0f, 1.0f}}, // 右下
 		{{ 0.4f,  0.7f, 0.0f},	{1.0f, 0.0f}}, // 右上
+	};*/
+
+	/*Vertex  vertices[] = {
+		{{0.0f, 0.5f ,0.0f},	{1.0f, 1.0f}}, // 0
+		{{0.5f / r, 0.25f,0.0f},	{0.0f, 1.0f}}, // 1
+		{{0.5f / r, -0.25f,0.0f},	{0.0f, 0.0f}}, // 2
+		{{0.0f, -0.5f,0.0f},	{1.0f, 0.0f}}, // 3
+		{{-0.5f / r, -0.25f,0.0f},	{0.0f, 0.0f}}, // 4
+		{{-0.5f / r, 0.25f,0.0f},	{0.0f, 1.0f}}, //5
+		{{0.7f, 0.0f,0.0f},	{1.0f, 0.0f}}, // 6
+		{{0.7f, -0.7f,0.0f},	{1.0f, 1.0f}}, // 7
+		{{1.0f , -0.7f,0.0f},	{0.0f, 0.0f}}, // 8
+	};*/
+
+	Vertex  vertices[] = {
+	{{0.0f, 0.0f ,0.0f},	{0.0f, 0.0f}}, // 0
+	{{0.0f, 0.5f ,0.0f},	{1.0f, 1.0f}}, // 0
+	{{0.5f / r, 0.25f,0.0f},	{1.0f, 1.0f}}, // 1
+	{{0.5f / r, -0.25f,0.0f},	{1.0f, 1.0f}}, // 2
+	{{0.0f, -0.5f,0.0f},	{1.0f, 1.0f}}, // 3
+	{{-0.5f / r, -0.25f,0.0f},	{1.0f, 1.0f}}, // 4
+	{{-0.5f / r, 0.25f,0.0f},	{1.0f, 1.0f}}, //5
+	{{0.7f, 0.0f,0.0f},	{1.0f, 1.0f}}, // 6
+	{{0.7f, -0.7f,0.0f},	{1.0f, 1.0f}}, // 7
+	{{1.0f , -0.7f,0.0f},	{0.0f, 0.0f}}, // 8
 	};
+
+	/*XMFLOAT3 vertices[] =
+	{
+			{0.0f, 0.5f ,0.0f} ,//0
+			{0.5f / r, 0.25f,0.0f} ,//1
+			{0.5f / r, -0.25f,0.0f} ,//2
+			{0.0f, -0.5f,0.0f} ,//3
+			{-0.5f / r, -0.25f,0.0f} ,	//4
+			{-0.5f / r, 0.25f,0.0f},//5
+			{0.7f, 0.0f,0.0f},//6
+			{0.7f, -0.7f,0.0f},//7
+			{1.0f , -0.7f,0.0f},//8
+	};*/
 
 	//XMFLOAT3 vertices[] = {	//TRIANGLELIST
 	//	//　左下の三角形
@@ -314,7 +357,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	vbView.StrideInBytes = sizeof(vertices[0]); // 1頂点あたりのバイト数
 
 	//Chapter4_11_2 P150
-	unsigned short indices[] = { 0, 1, 2,    2, 1, 3 };
+	//unsigned short indices[] = { 0, 1, 2,    2, 1, 3 };
+//	unsigned short indices[] = { 0,1,2, 0,2,3, 0,3,4, 0,4,5, 6,7,8 };
+	unsigned short indices[] = { 0,1,2, 0,2,3, 0,3,4, 0,4,5, 0,5,6, 0,6,1, 7,8,9 };
 	ID3D12Resource* idxBuff = nullptr;
 	resdesc.Width = sizeof(indices);
 	result = _dev->CreateCommittedResource(
@@ -554,9 +599,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//	rgba.B = rand() % 256;
 	//	rgba.A = 255;//アルファは1.0という事にします。
 	//}
+
+	double ru = 50.0f;
+
 	for (int i = 0; i < 256; i++) {
 		for (int j = 0; j < 256; j++) {
-			if (i == j) {
+			/*if ((i / 16 % 2) % 2 == 0)
+			if ( (i / 16 % 2) % 2 == 0 )
+			{
 				texturedata[j * 256 + i].R = 255;
 				texturedata[j * 256 + i].G = 0;
 				texturedata[j * 256 + i].B = 0;
@@ -565,8 +615,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				texturedata[j * 256 + i].R = 255;
 				texturedata[j * 256 + i].G = 255;
 				texturedata[j * 256 + i].B = 255;
+			}*/
+			if (i + j < ru)
+			{
+				texturedata[j + i * 256].R = 255;
+				texturedata[j + i * 256].G = 0;
+				texturedata[j + i * 256].B = 0;
+
 			}
-			texturedata[j * 256 + i].A = 1;
+			else {
+				texturedata[j + i * 256].R = 255;
+				texturedata[j + i * 256].G = 255;
+				texturedata[j + i * 256].B = 255;
+			}
+			texturedata[j + i * 256].A = 1;
 		}
 	}
 
@@ -629,8 +691,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 
 	MSG	msg = {};
-	// Chapter4_10_3
-	float clearColor[] = { 0.125f, 0.125f, 0.125f, 1.0f }; //黄色
+	float clearColor[] = { 1.0f, 1.0f, 0.0f, 1.0f }; //黄色
 
 	while (true) {
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
@@ -682,7 +743,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			texDescHeap->GetGPUDescriptorHandleForHeapStart()); // ヒープアドレス
 
 
-		_cmdList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+		//_cmdList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+		_cmdList->DrawIndexedInstanced(23, 1, 0, 0, 0);
 
 		//// Chapter3_4_3　 リソースバリア
 		BarrierDesc.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
